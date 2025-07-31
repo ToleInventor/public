@@ -2,46 +2,223 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Smart Bell System Events</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <title>Smart Bell System | Manage Alarms</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    :root {
+      --bg-color: #f0f4f8;
+      --text-color: #333;
+      --card-color: white;
+      --accent-color: #3a7bd5;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #f0f0f0;
+      --card-color: #1e1e1e;
+      --accent-color: #90caf9;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 0 20px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .header {
+      background-color: var(--accent-color);
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 30px 0 20px;
+      position: relative;
+    }
+
+    .header a {
+      position: absolute;
+      right: 30px;
+      top: 25px;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      background-color: rgba(255,255,255,0.2);
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+
+    #digital-clock {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .current-alarms {
+      background-color: var(--card-color);
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      max-width: 700px;
+      margin: auto;
+      transition: background 0.3s ease;
+    }
+
+    .current-alarms h2 {
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+      font-size: 20px;
+      color: var(--accent-color);
+    }
+
+    #normal-events-list, #special-events-list {
+      min-height: 60px;
+      margin-bottom: 40px;
+      padding: 10px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    footer {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .bottom {
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 20px 30px;
+      border-radius: 50%;
+      font-size: 28px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .bottom:hover {
+      background-color: #2f5fa3;
+    }
+  </style>
 </head>
 <body>
-  <h1>Smart Bell Smart Events</h1>
+  <div class="header">
+    <div id="digital-clock"></div>
+    MANAGE BELL EVENTS
+    <a href="settings.html">Settings</a>
+  </div>
 
-  <section>
-    <h2>Create Normal Event</h2>
-    <form id="normalEventForm">
-      <label>Title: <input type="text" id="normalTitle" required /></label><br/>
-      <label>Time (HH:MM): <input type="text" id="normalTime" required /></label><br/>
-      <label>Delay (seconds): <input type="number" id="normalDelay" value="0" required /></label><br/>
-      <label>Tone: <input type="text" id="normalTone" required /></label><br/>
-      <label>Active: <input type="checkbox" id="normalActive" checked /></label><br/>
-      <label>Frequency (weekdays, comma-separated e.g. monday, wednesday):<br/>
-        <input type="text" id="normalFrequency" required />
-      </label><br/>
-      <button type="submit">Add Normal Event</button>
-    </form>
-  </section>
+  <div class="current-alarms">
+    <h2><i class="fa-regular fa-bell"></i> Normal Events</h2>
+    <div id="normal-events-list"><i>Loading normal events...</i></div>
 
-  <section>
-    <h2>Create Special Event</h2>
-    <form id="specialEventForm">
-      <label>Date (YYYY-MM-DD): <input type="date" id="specialDate" required /></label><br/>
-      <label>Time (HH:MM): <input type="text" id="specialTime" required /></label><br/>
-      <label>Description: <input type="text" id="specialDescription" required /></label><br/>
-      <label>Tone: <input type="text" id="specialTone" required /></label><br/>
-      <label>Completed: <input type="checkbox" id="specialCompleted" /></label><br/>
-      <button type="submit">Add Special Event</button>
-    </form>
-  </section>
+    <h2><i class="fa-solid fa-star"></i> Special Events</h2>
+    <div id="special-events-list"><i>Loading special events...</i></div>
+  </div>
 
-  <section>
-    <h2>Today's ESP32 Events</h2>
-    <button id="loadEsp32Btn">Load ESP32 Events (for today)</button>
-    <button id="updateEsp32Btn">Update ESP32 Events from Normal/Special</button>
-    <ul id="esp32EventsList"></ul>
-  </section>
+  <footer>
+    <a href="ADD NEW EVENT.html">
+      <button id="weka-alarm" class="bottom">+</button>
+    </a>
+  </footer>
 
-  <script src="js/main.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:5000/api';
+
+    // Fetch normal events
+    async function fetchNormalEvents() {
+      try {
+        const res = await fetch(`${API_BASE}/normalEvents`);
+        if (!res.ok) throw new Error('Failed to fetch normal events');
+        return await res.json();
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
+
+    // Fetch special events
+    async function fetchSpecialEvents() {
+      try {
+        const res = await fetch(`${API_BASE}/specialEvents`);
+        if (!res.ok) throw new Error('Failed to fetch special events');
+        return await res.json();
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
+
+    // Render normal events
+    function renderNormalEvents(events) {
+      const list = document.getElementById('normal-events-list');
+      if (events.error) {
+        list.innerHTML = `<i>Error: ${events.error}</i>`;
+        return;
+      }
+      if (!events.length) {
+        list.innerHTML = '<i>No normal events scheduled.</i>';
+        return;
+      }
+      list.innerHTML = '';
+      events.forEach(ev => {
+        const div = document.createElement('div');
+        div.style.marginBottom = '8px';
+        const freq = Array.isArray(ev.frequency) ? ev.frequency.join(', ') : ev.frequency;
+        div.innerHTML = `<strong>${ev.time}</strong> — ${ev.title} <small>(Days: ${freq})</small>`;
+        list.appendChild(div);
+      });
+    }
+
+    // Render special events
+    function renderSpecialEvents(events) {
+      const list = document.getElementById('special-events-list');
+      if (events.error) {
+        list.innerHTML = `<i>Error: ${events.error}</i>`;
+        return;
+      }
+      if (!events.length) {
+        list.innerHTML = '<i>No special events scheduled.</i>';
+        return;
+      }
+      list.innerHTML = '';
+      events.forEach(ev => {
+        const div = document.createElement('div');
+        div.style.marginBottom = '8px';
+        const status = ev.completed ? '✅ Done' : '⏳ Pending';
+        div.innerHTML = `<strong>${ev.date} ${ev.time}</strong> — ${ev.description} <small>[${status}]</small>`;
+        list.appendChild(div);
+      });
+    }
+
+    // Update clock every second
+    function updateClock() {
+      const clock = document.getElementById('digital-clock');
+      const now = new Date();
+      clock.innerText = now.toLocaleTimeString();
+    }
+
+    window.onload = async () => {
+      // Apply saved theme
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // Fetch and render events from backend
+      const normalEvents = await fetchNormalEvents();
+      renderNormalEvents(normalEvents);
+
+      const specialEvents = await fetchSpecialEvents();
+      renderSpecialEvents(specialEvents);
+    };
+  </script>
 </body>
 </html>
