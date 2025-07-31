@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Bell System Events</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <h1>Smart Bell Smart Events</h1>
+
+  <section>
+    <h2>Create Normal Event</h2>
+    <form id="normalEventForm">
+      <label>Title: <input type="text" id="normalTitle" required /></label><br/>
+      <label>Time (HH:MM): <input type="text" id="normalTime" required /></label><br/>
+      <label>Delay (seconds): <input type="number" id="normalDelay" value="0" required /></label><br/>
+      <label>Tone: <input type="text" id="normalTone" required /></label><br/>
+      <label>Active: <input type="checkbox" id="normalActive" checked /></label><br/>
+      <label>Frequency (weekdays, comma-separated e.g. monday, wednesday):<br/>
+        <input type="text" id="normalFrequency" required />
+      </label><br/>
+      <button type="submit">Add Normal Event</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Create Special Event</h2>
+    <form id="specialEventForm">
+      <label>Date (YYYY-MM-DD): <input type="date" id="specialDate" required /></label><br/>
+      <label>Time (HH:MM): <input type="text" id="specialTime" required /></label><br/>
+      <label>Description: <input type="text" id="specialDescription" required /></label><br/>
+      <label>Tone: <input type="text" id="specialTone" required /></label><br/>
+      <label>Completed: <input type="checkbox" id="specialCompleted" /></label><br/>
+      <button type="submit">Add Special Event</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Today's ESP32 Events</h2>
+    <button id="loadEsp32Btn">Load ESP32 Events (for today)</button>
+    <button id="updateEsp32Btn">Update ESP32 Events from Normal/Special</button>
+    <ul id="esp32EventsList"></ul>
+  </section>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
