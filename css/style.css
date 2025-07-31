@@ -1,0 +1,28 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+h1, h2 {
+  color: #333;
+}
+
+label {
+  font-weight: bold;
+}
+
+input[type=text], input[type=number], input[type=date] {
+  margin: 5px 0 10px;
+  padding: 5px;
+  width: 200px;
+}
+
+button {
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#esp32EventsList li {
+  margin-bottom: 8px;
+}
